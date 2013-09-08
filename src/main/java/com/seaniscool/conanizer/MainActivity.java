@@ -14,42 +14,61 @@ import android.view.TextureView;
 public class MainActivity extends Activity implements
 		TextureView.SurfaceTextureListener {
 
-	private Camera mCamera;
+	private Camera camera;
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		TextureView mTextureView = new TextureView(this);
-		mTextureView.setSurfaceTextureListener(this);
-
-		setContentView(mTextureView);
+		TextureView view = new TextureView(this);
+		view.setSurfaceTextureListener(this);
+		setContentView(view);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void onSurfaceTextureAvailable(SurfaceTexture surface, int width,
 			int height) {
-		mCamera = Camera.open();
-
+		camera = Camera.open();
 		try {
-			mCamera.setPreviewTexture(surface);
-			mCamera.startPreview();
+			camera.setPreviewTexture(surface);
+            camera.setDisplayOrientation(90);
+			camera.startPreview();
 		} catch (IOException ioe) {
 			// Something bad happened
+			ioe.printStackTrace();
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width,
 			int height) {
 		// Ignored, Camera does all the work for us
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-		mCamera.stopPreview();
-		mCamera.release();
+		camera.stopPreview();
+		camera.release();
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-		// Invoked every time there's a new Camera preview frame
+		// do nothing
 	}
 
 }
