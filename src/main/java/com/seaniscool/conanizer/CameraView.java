@@ -2,7 +2,6 @@ package com.seaniscool.conanizer;
 
 import java.io.IOException;
 
-import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -12,14 +11,12 @@ import android.view.SurfaceView;
  */
 public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 
-	private int rotation = 90;
-
+	private final HairView hairView;
 	private Camera camera;
-	private HairView hairView;
 
 	CameraView(MainActivity context) {
 		super(context);
-		this.hairView = context.getHairView();
+		hairView = context.getHairView();
 		SurfaceHolder holder = getHolder();
 		holder.addCallback(this);
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -32,31 +29,13 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 	public void surfaceCreated(SurfaceHolder holder) {
 		camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
 		try {
+			camera.setPreviewCallback(hairView);
 			camera.setPreviewDisplay(holder);
-			camera.setDisplayOrientation(rotation);
+			camera.setDisplayOrientation(90);
 			camera.startPreview();
-			camera.startFaceDetection();
-			camera.setFaceDetectionListener(hairView);
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-		hairView.setMatrix(createTransformationMatrix());
-	}
-
-	/**
-	 * Camera driver coordinates range from (-1000, -1000) to (1000, 1000).<br/>
-	 * UI coordinates range from (0, 0) to (width, height).
-	 */
-	private Matrix createTransformationMatrix() {
-		Matrix matrix = new Matrix();
-		// Need mirror for front camera.
-		boolean mirror = true;
-		// (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT);
-		matrix.setScale(mirror ? -1 : 1, 1);
-		matrix.postRotate(rotation);
-		matrix.postScale(getWidth() / 2000f, getHeight() / 2000f);
-		matrix.postTranslate(getWidth() / 2f, getHeight() / 2f);
-		return matrix;
 	}
 
 	/**
@@ -64,7 +43,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		camera.stopFaceDetection();
 		camera.stopPreview();
 		camera = null;
 	}
